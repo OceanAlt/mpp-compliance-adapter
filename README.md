@@ -36,6 +36,22 @@ export const GET = complianceGate(mppx.charge({ amount: "0.1" })(handler), {
 });
 ```
 
+## RAP conformance test suite
+
+`rap-conformance.mjs` is the runnable RAP v1.0 conformance suite — 15 vectors you can run against **any** implementation, including ours.
+
+```bash
+node rap-conformance.mjs                           # test OceanAlt (default)
+node rap-conformance.mjs https://your-gateway.com  # test your own implementation
+node rap-conformance.mjs https://... --json        # machine-readable output
+```
+
+Node 18+, no dependencies, nothing to install. Exit code is non-zero when a `critical` vector fails, so it works as a CI gate.
+
+"Conformant" has exactly one definition: every `critical` vector passes. `important` failures are listed in full but do not void conformance.
+
+This is the same assertion implementation and the same vectors OceanAlt runs against itself daily; the published scoreboard, including anything we fail, is at https://oceanalt.com/en/rap/conformance. A suite that always gives itself full marks is worth less than no suite at all — as a sanity check, run it against a site that implements nothing (`node rap-conformance.mjs https://example.com`) and it should fail most vectors.
+
 Files: `mpp.mjs` (gate + problem details + challenge param + receipt header), `core.mjs` (protocol-agnostic screening core, calls `https://oceanalt.com/api/risk`), `mpp-demo.mjs`.
 
 Spec draft: `specs/extensions/draft-payment-compliance-00.md` in the tempoxyz/mpp-specs PR. Framework: https://oceanalt.com/en/rap
