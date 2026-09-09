@@ -36,6 +36,29 @@ export const GET = complianceGate(mppx.charge({ amount: "0.1" })(handler), {
 });
 ```
 
+## Quickstart — the one call to make before you pay
+
+`quickstart.mjs` is the smallest useful integration: Node 18+, no dependencies, no API key, no signup.
+
+```bash
+node quickstart.mjs                       # runs two sample addresses
+node quickstart.mjs 0xYourPayeeAddress
+```
+
+It shows the call an agent should make *before* it moves money, and how to branch on the answer:
+
+```js
+const r = await fetch(`https://oceanalt.com/api/risk?addr=${address}&network=ethereum`).then(x => x.json());
+if (r.blocked || r.verdict === "risky") return refuse(r.signals[0]);
+if (r.verdict === "caution")            return humanReview(r);
+// clear — but "clear" means we found nothing in the data we hold, not that it is safe.
+// Keep enforcing your own mandate: per-payment cap, daily cap, payee allowlist.
+```
+
+Branch on `signal_keys`, not on the prose. The sentences are localised (`&lang=zh` returns Chinese); the keys are not. Code that greps English strings breaks the day someone flips the language.
+
+Fail closed: anything not positively cleared is not paid. A screening call that fails open is theatre.
+
 ## RAP conformance test suite
 
 `rap-conformance.mjs` is the runnable RAP v1.0 conformance suite — 15 vectors you can run against **any** implementation, including ours.
