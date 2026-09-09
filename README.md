@@ -2,7 +2,7 @@
 
 A framework-agnostic **compliance gate for the Machine Payments Protocol (MPP)** — the reference implementation behind the companion extension draft `draft-payment-compliance-00` (payer screening before settlement).
 
-It wraps any MPP resource handler of the form `(Request) => Response` (for example `mppx.charge({...})(request)`) and uses only hooks the core Payment scheme already provides:
+It wraps any MPP resource handler of the form `(Request) => Response` (for example `mppx.charge({...})(request)`) and builds only on MPP's existing extensibility points — the `compliance` challenge parameter and the `Payment-Compliance` header below are this extension's own design, not part of the core Payment scheme:
 
 - **Challenge**: appends a `compliance` parameter to the `402` `WWW-Authenticate: Payment` challenge (core §9.3 additional parameter; clients that don't know it ignore it; not part of the HMAC binding).
 - **Settlement**: after the credential is verified and before settlement, screens the payer derived from `Credential.source` (`did:pkh:eip155:<chainId>:<address>`). `FAIL` → `403 application/problem+json` (core §4.2 "payment verified, but policy denies access"). `UNCERTAIN` → `403` with `retry: true` and `Retry-After` (fail-closed by default). Never settles on a failed or unknown screen.
